@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>p2p test</title>
+</head>
+
+<body>
+    <h1>p2p rock paper scissors</h1>
+
+    <p>I'm the</p>
+    <button id="button-send" onclick="selectsender()">Sender</button> - I will send the connection
+    <br>
+    <br>
+    <button id="button-receive" onclick="receiver()">Receiver</button> - I will receive the connection
+
+
+    <br>
+    <br>
+
+    
+    <div hidden id="sender_info">
+        other person id:
+        <br>
+        <textarea name="" id="otherid" cols="55" rows="1" style="resize: none;"></textarea>
+        <br>
+        <button id="button-sendthing" onclick="sender()">Send connection</button>
+        <br>
+        <br>
+    </div>
+
+    <div hidden id="receiver_info">
+        my id:
+        <br>
+        <textarea name="" id="myid" cols="55" rows="1" style="resize: none;">loading...</textarea>
+        <br>
+        <button onclick="copyid()">Copy my ID</button>
+        <br><br>
+    </div>
+
+
+    <div>
+        log
+        <br>
+        <textarea readonly name="" id="thelog" cols="55" rows="30" style="resize: none;"></textarea>
+    </div>
+
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <script>
+
+          function copyid() {
+            var txt = document.getElementById("myid").value;
+            navigator.clipboard.writeText(txt);
+            dolog("copied id to clipboard.");
+        }
+        
+        function selectsender() {
+            document.getElementById("button-send").setAttribute("disabled", true);
+            document.getElementById("button-receive").setAttribute("disabled", true);
+            document.getElementById("sender_info").hidden = false;
+            dolog("selected sender.");
+        }
+
+        function sender() {
+            const peer = new Peer();
+
+            var yy = document.getElementById("otherid").value;
+            dolog("connecting to '" + yy + "'");
+
+            const conn = peer.connect(yy);
+            conn.on("open", () => {
+                dolog("connection established.");
+                conn.send("hi!");
+            });
+        }
+
+        function receiver() {
+            const peer = new Peer();
+
+            document.getElementById("button-send").setAttribute("disabled", true);
+            document.getElementById("button-receive").setAttribute("disabled", true);
+            document.getElementById("receiver_info").hidden = false;
+            dolog("started receiving connections.");
+
+            peer.on("open", (id) => {
+                document.getElementById("myid").value = id;
+            });
+
+
+            peer.on("connection", (conn) => {
+                conn.on("data", (data) => {
+                    // Will print 'hi!'
+                    console.log(data);
+                });
+                conn.on("open", () => {
+                    conn.send("hello!");
+                });
+            });
+        }
+
+        function dolog(msg) {
+            document.getElementById("thelog").value += "> " + msg + "\n";
+        }
+        
+
+    </script>
+</body>
+</html>
